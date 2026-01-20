@@ -89,3 +89,78 @@ export async function createRecipe(input: CreateRecipeInput) {
   revalidatePath("/recipes");
   return recipe;
 }
+
+interface UpdateRecipeInput {
+  id: string;
+  name: string;
+  description?: string;
+  servings: number;
+  ingredients: RecipeIngredient[];
+}
+
+export async function updateRecipe(input: UpdateRecipeInput) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  // Verify the recipe belongs to the user
+  const existing = await db.query.recipes.findFirst({
+    where: eq(recipes.id, input.id),
+  });
+
+  if (!existing || existing.userId !== userId) {
+    throw new Error("Recipe not found");
+  }
+
+  // Update recipe
+  const [recipe] = await db
+    .update(recipes)
+    .set({
+      name: input.name,
+      description: input.description || null,
+      servings: input.servings,
+    })
+    .where(eq(recipes.id, input.id))
+    .returning();
+
+  // Delete existing ingredients and insert new ones
+  await db.delete(recipeProducts).where(eq(recipeProducts.recipeId, input.id));
+
+  if (input.ingredients.length > 0) {
+    await db.insert(recipeProducts).values(
+      input.ingredients.map((ing) => ({
+        recipeId: recipe.id,
+        productId: ing.productId,
+        quantity: ing.quantity,
+        unit: ing.unit,
+        baseQuantity: ing.baseQuantity,
+        baseUnit: ing.baseUnit,
+        notes: ing.notes || null,
+      }))
+    );
+  }
+
+  revalidatePath("/recipes");
+  return recipe;
+}
+
+export async function deleteRecipe(id: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  // Verify the recipe belongs to the user
+  const existing = await db.query.recipes.findFirst({
+    where: eq(recipes.id, id),
+  });
+
+  if (!existing || existing.userId !== userId) {
+    throw new Error("Recipe not found");
+  }
+
+  await db.delete(recipes).where(eq(recipes.id, id));
+
+  revalidatePath("/recipes");
+}
