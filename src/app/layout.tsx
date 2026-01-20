@@ -10,6 +10,7 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
+import { ShoppingCart } from "lucide-react";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -39,7 +40,10 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <header className="flex items-center justify-between p-4">
-            <Link href="/" className="text-xl font-semibold">
+            <Link href="/" className="flex items-center gap-2 text-xl font-semibold">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-green-600">
+                <ShoppingCart className="h-5 w-5 text-white" />
+              </span>
               Shopping Planner
             </Link>
             <div className="flex gap-4">
