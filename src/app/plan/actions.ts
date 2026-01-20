@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { weeklyPlans, mealSlots } from "@/db/schema";
+import { weeklyPlans, mealSlots, customShoppingItems } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -255,4 +255,128 @@ export async function getShoppingListForPlan(weeklyPlanId: string) {
 function formatDisplayQuantity(baseQuantity: number): number {
   // Round to 2 decimal places for cleaner display
   return Math.round(baseQuantity * 100) / 100;
+}
+
+export interface CustomShoppingItemData {
+  id: string;
+  name: string;
+  quantity: number | null;
+  unit: string | null;
+  category: string;
+  isChecked: boolean;
+}
+
+export async function getCustomItemsForPlan(
+  weeklyPlanId: string
+): Promise<CustomShoppingItemData[]> {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  // Verify the weekly plan belongs to the user
+  const plan = await db.query.weeklyPlans.findFirst({
+    where: eq(weeklyPlans.id, weeklyPlanId),
+  });
+
+  if (!plan || plan.userId !== userId) {
+    throw new Error("Weekly plan not found");
+  }
+
+  const items = await db.query.customShoppingItems.findMany({
+    where: eq(customShoppingItems.weeklyPlanId, weeklyPlanId),
+    orderBy: (items, { asc }) => [asc(items.category), asc(items.name)],
+  });
+
+  return items.map((item) => ({
+    id: item.id,
+    name: item.name,
+    quantity: item.quantity,
+    unit: item.unit,
+    category: item.category,
+    isChecked: item.isChecked,
+  }));
+}
+
+interface AddCustomItemInput {
+  weeklyPlanId: string;
+  name: string;
+  quantity?: number;
+  unit?: string;
+  category?: string;
+}
+
+export async function addCustomItem(input: AddCustomItemInput) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  // Verify the weekly plan belongs to the user
+  const plan = await db.query.weeklyPlans.findFirst({
+    where: eq(weeklyPlans.id, input.weeklyPlanId),
+  });
+
+  if (!plan || plan.userId !== userId) {
+    throw new Error("Weekly plan not found");
+  }
+
+  await db.insert(customShoppingItems).values({
+    weeklyPlanId: input.weeklyPlanId,
+    name: input.name,
+    quantity: input.quantity ?? null,
+    unit: input.unit ?? null,
+    category: input.category ?? "Other",
+  });
+
+  revalidatePath("/plan/shopping-list");
+}
+
+export async function removeCustomItem(itemId: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  // Verify ownership through the weekly plan
+  const item = await db.query.customShoppingItems.findFirst({
+    where: eq(customShoppingItems.id, itemId),
+    with: {
+      weeklyPlan: true,
+    },
+  });
+
+  if (!item || item.weeklyPlan.userId !== userId) {
+    throw new Error("Item not found");
+  }
+
+  await db.delete(customShoppingItems).where(eq(customShoppingItems.id, itemId));
+
+  revalidatePath("/plan/shopping-list");
+}
+
+export async function toggleCustomItemChecked(itemId: string, isChecked: boolean) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  // Verify ownership through the weekly plan
+  const item = await db.query.customShoppingItems.findFirst({
+    where: eq(customShoppingItems.id, itemId),
+    with: {
+      weeklyPlan: true,
+    },
+  });
+
+  if (!item || item.weeklyPlan.userId !== userId) {
+    throw new Error("Item not found");
+  }
+
+  await db
+    .update(customShoppingItems)
+    .set({ isChecked })
+    .where(eq(customShoppingItems.id, itemId));
+
+  revalidatePath("/plan/shopping-list");
 }

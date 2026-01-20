@@ -2,7 +2,11 @@ import { relations } from "drizzle-orm";
 import { products } from "./schema/products";
 import { recipes, recipeProducts } from "./schema/recipes";
 import { weeklyPlans, mealSlots } from "./schema/meal-plans";
-import { shoppingLists, shoppingListItems } from "./schema/shopping-list";
+import {
+  shoppingLists,
+  shoppingListItems,
+  customShoppingItems,
+} from "./schema/shopping-list";
 
 export const productsRelations = relations(products, ({ many }) => ({
   recipeProducts: many(recipeProducts),
@@ -31,6 +35,7 @@ export const recipeProductsRelations = relations(
 export const weeklyPlansRelations = relations(weeklyPlans, ({ many }) => ({
   mealSlots: many(mealSlots),
   shoppingLists: many(shoppingLists),
+  customShoppingItems: many(customShoppingItems),
 }));
 
 export const mealSlotsRelations = relations(mealSlots, ({ one }) => ({
@@ -65,6 +70,16 @@ export const shoppingListItemsRelations = relations(
     product: one(products, {
       fields: [shoppingListItems.productId],
       references: [products.id],
+    }),
+  })
+);
+
+export const customShoppingItemsRelations = relations(
+  customShoppingItems,
+  ({ one }) => ({
+    weeklyPlan: one(weeklyPlans, {
+      fields: [customShoppingItems.weeklyPlanId],
+      references: [weeklyPlans.id],
     }),
   })
 );

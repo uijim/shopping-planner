@@ -35,7 +35,22 @@ export const shoppingListItems = pgTable("shopping_list_items", {
   isChecked: boolean("is_checked").notNull().default(false),
 });
 
+export const customShoppingItems = pgTable("custom_shopping_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  weeklyPlanId: uuid("weekly_plan_id")
+    .notNull()
+    .references(() => weeklyPlans.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  quantity: real("quantity"),
+  unit: text("unit"),
+  category: text("category").notNull().default("Other"),
+  isChecked: boolean("is_checked").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export type ShoppingList = typeof shoppingLists.$inferSelect;
 export type NewShoppingList = typeof shoppingLists.$inferInsert;
 export type ShoppingListItem = typeof shoppingListItems.$inferSelect;
 export type NewShoppingListItem = typeof shoppingListItems.$inferInsert;
+export type CustomShoppingItem = typeof customShoppingItems.$inferSelect;
+export type NewCustomShoppingItem = typeof customShoppingItems.$inferInsert;
