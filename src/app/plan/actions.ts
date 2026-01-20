@@ -153,3 +153,106 @@ export async function removeMealSlot(slotId: string) {
 
   revalidatePath("/plan");
 }
+
+export interface ShoppingListItem {
+  productId: string;
+  productName: string;
+  category: string;
+  totalBaseQuantity: number;
+  baseUnit: "g" | "ml" | "unit";
+  displayQuantity: number;
+  displayUnit: string;
+}
+
+export async function getShoppingListForPlan(weeklyPlanId: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  // Verify the weekly plan belongs to the user
+  const plan = await db.query.weeklyPlans.findFirst({
+    where: eq(weeklyPlans.id, weeklyPlanId),
+    with: {
+      mealSlots: {
+        with: {
+          recipe: {
+            with: {
+              recipeProducts: {
+                with: {
+                  product: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!plan || plan.userId !== userId) {
+    throw new Error("Weekly plan not found");
+  }
+
+  // Aggregate ingredients by product
+  const aggregated = new Map<
+    string,
+    {
+      productId: string;
+      productName: string;
+      category: string;
+      totalBaseQuantity: number;
+      baseUnit: "g" | "ml" | "unit";
+      displayUnit: string;
+    }
+  >();
+
+  for (const slot of plan.mealSlots) {
+    if (!slot.recipe) continue;
+
+    const recipe = slot.recipe;
+    const servingsScale = slot.servings / recipe.servings;
+
+    for (const rp of recipe.recipeProducts) {
+      const key = `${rp.productId}-${rp.baseUnit}`;
+      const scaledQuantity = rp.baseQuantity * servingsScale;
+
+      if (aggregated.has(key)) {
+        const existing = aggregated.get(key)!;
+        existing.totalBaseQuantity += scaledQuantity;
+      } else {
+        aggregated.set(key, {
+          productId: rp.productId,
+          productName: rp.product.name,
+          category: rp.product.category,
+          totalBaseQuantity: scaledQuantity,
+          baseUnit: rp.baseUnit,
+          displayUnit: rp.unit,
+        });
+      }
+    }
+  }
+
+  // Convert to array and format display quantities
+  const items: ShoppingListItem[] = Array.from(aggregated.values()).map(
+    (item) => ({
+      ...item,
+      displayQuantity: formatDisplayQuantity(item.totalBaseQuantity),
+    })
+  );
+
+  // Sort by category then by name
+  items.sort((a, b) => {
+    if (a.category !== b.category) {
+      return a.category.localeCompare(b.category);
+    }
+    return a.productName.localeCompare(b.productName);
+  });
+
+  return { items, weekStartDate: plan.weekStartDate };
+}
+
+function formatDisplayQuantity(baseQuantity: number): number {
+  // Round to 2 decimal places for cleaner display
+  return Math.round(baseQuantity * 100) / 100;
+}
