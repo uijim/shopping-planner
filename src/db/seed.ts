@@ -38,14 +38,14 @@ const builtInUnits = [
 ];
 
 const globalProducts = [
-  // Dairy & Eggs
-  { name: "Eggs", category: "Dairy & Eggs", defaultUnit: "unit" as const },
-  { name: "Milk", category: "Dairy & Eggs", defaultUnit: "ml" as const },
-  { name: "Butter", category: "Dairy & Eggs", defaultUnit: "g" as const },
-  { name: "Cheese", category: "Dairy & Eggs", defaultUnit: "g" as const },
-  { name: "Yogurt", category: "Dairy & Eggs", defaultUnit: "g" as const },
-  { name: "Cream", category: "Dairy & Eggs", defaultUnit: "ml" as const },
-  { name: "Sour Cream", category: "Dairy & Eggs", defaultUnit: "g" as const },
+  // Dairy
+  { name: "Eggs", category: "Dairy", defaultUnit: "unit" as const },
+  { name: "Milk", category: "Dairy", defaultUnit: "ml" as const },
+  { name: "Butter", category: "Dairy", defaultUnit: "g" as const },
+  { name: "Cheese", category: "Dairy", defaultUnit: "g" as const },
+  { name: "Yogurt", category: "Dairy", defaultUnit: "g" as const },
+  { name: "Cream", category: "Dairy", defaultUnit: "ml" as const },
+  { name: "Sour Cream", category: "Dairy", defaultUnit: "g" as const },
 
   // Meat & Poultry
   { name: "Chicken Breast", category: "Meat & Poultry", defaultUnit: "g" as const },
