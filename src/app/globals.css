@@ -123,3 +123,194 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Print utility - hide elements on print */
+@utility print-hidden {
+  @media print {
+    display: none !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  /* Reset colors for print */
+  :root {
+    --background: white;
+    --foreground: black;
+    --card: white;
+    --card-foreground: black;
+    --muted-foreground: #666;
+    --border: #ccc;
+  }
+
+  /* Force light mode colors */
+  .dark {
+    --background: white;
+    --foreground: black;
+    --card: white;
+    --card-foreground: black;
+    --muted-foreground: #666;
+    --border: #ccc;
+  }
+
+  /* Hide header navigation */
+  header {
+    display: none !important;
+  }
+
+  /* Hide interactive buttons */
+  button,
+  [role="button"] {
+    display: none !important;
+  }
+
+  /* Hide dialogs */
+  [role="dialog"],
+  [data-state="open"] {
+    display: none !important;
+  }
+
+  /* Hide links styled as buttons but keep navigation context */
+  a:has(button) {
+    display: none !important;
+  }
+
+  /* Body and page setup */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+    line-height: 1.4;
+  }
+
+  /* Remove shadows and adjust cards for print */
+  [class*="shadow"] {
+    box-shadow: none !important;
+  }
+
+  /* Card styling for print */
+  [class*="rounded"] {
+    border-radius: 0 !important;
+  }
+
+  /* Style cards with simple borders */
+  .card,
+  [data-slot="card"],
+  div:has(> [data-slot="card-header"]) {
+    border: 1px solid #ccc !important;
+    background: white !important;
+    margin-bottom: 1rem;
+    page-break-inside: avoid;
+  }
+
+  /* Card headers */
+  [data-slot="card-header"] {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+  }
+
+  /* Hide checkboxes in print view */
+  [role="checkbox"] {
+    display: none !important;
+  }
+
+  /* Ensure list items are visible */
+  li {
+    display: flex !important;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+  }
+
+  /* Keep labels visible */
+  label {
+    display: inline !important;
+    cursor: default !important;
+  }
+
+  /* Strikethrough styling for checked items */
+  .line-through {
+    text-decoration: line-through;
+    color: #666;
+  }
+
+  /* Page margins */
+  @page {
+    margin: 1.5cm;
+  }
+
+  /* Prevent page breaks inside categories */
+  .space-y-6 > div {
+    page-break-inside: avoid;
+  }
+
+  /* Print title styling */
+  h1 {
+    font-size: 18pt;
+    margin-bottom: 0.25rem;
+  }
+
+  /* Muted text for print */
+  .text-muted-foreground {
+    color: #666 !important;
+  }
+
+  /* Ensure flex layouts work in print */
+  .flex {
+    display: flex !important;
+  }
+
+  .items-center {
+    align-items: center !important;
+  }
+
+  .gap-3 {
+    gap: 0.75rem !important;
+  }
+
+  .gap-4 {
+    gap: 1rem !important;
+  }
+
+  /* Hide the empty shopping cart icon */
+  svg.lucide-shopping-cart {
+    display: none !important;
+  }
+
+  /* Summary text styling */
+  .space-y-6 > p {
+    margin-bottom: 1rem;
+    font-style: italic;
+  }
+
+  /* Utility classes for print visibility */
+  .print-hidden {
+    display: none !important;
+  }
+
+  .print-visible {
+    display: block !important;
+  }
+}
+
+/* Screen-only utility (hidden on print, visible on screen) */
+.screen-only {
+  display: block;
+}
+
+@media print {
+  .screen-only {
+    display: none !important;
+  }
+}
+
+/* Print-only utility (visible on print, hidden on screen) */
+.print-only {
+  display: none;
+}
+
+@media print {
+  .print-only {
+    display: block !important;
+  }
+}

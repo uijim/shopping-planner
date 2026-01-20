@@ -202,7 +202,7 @@ export function ShoppingListContent({
     <>
       <div className="mb-6 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Link href="/plan">
+          <Link href="/plan" className="screen-only">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -321,12 +321,12 @@ export function ShoppingListContent({
       {totalItemCount === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <ShoppingCart className="mb-4 h-12 w-12 text-muted-foreground" />
+            <ShoppingCart className="mb-4 h-12 w-12 text-muted-foreground screen-only" />
             <p className="text-lg font-medium">No items in your shopping list</p>
             <p className="text-muted-foreground">
               Add meals to your weekly plan or add custom items.
             </p>
-            <div className="mt-4 flex gap-2">
+            <div className="mt-4 flex gap-2 screen-only">
               <Link href="/plan">
                 <Button variant="outline">Go to Meal Planner</Button>
               </Link>
@@ -413,7 +413,7 @@ export function ShoppingListContent({
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive screen-only"
                             onClick={() => handleRemoveCustomItem(item.id)}
                             disabled={isPending}
                           >

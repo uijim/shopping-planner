@@ -39,7 +39,7 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <header className="flex items-center justify-between p-4">
+          <header className="flex items-center justify-between p-4 print-hidden">
             <div className="flex items-center gap-8">
               <Link href="/" className="flex items-center gap-2 text-xl font-semibold">
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-green-600">
