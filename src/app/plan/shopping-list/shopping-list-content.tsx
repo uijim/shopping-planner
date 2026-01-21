@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowLeft, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -200,7 +201,7 @@ export function ShoppingListContent({
 
   return (
     <>
-      <div className="mb-6 flex items-center justify-between gap-4">
+      <PageHeader>
         <div className="flex items-center gap-4">
           <Link href="/plan" className="screen-only">
             <Button variant="ghost" size="icon">
@@ -316,7 +317,7 @@ export function ShoppingListContent({
             </Form>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageHeader>
 
       {totalItemCount === 0 ? (
         <Card>

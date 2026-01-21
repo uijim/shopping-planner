@@ -5,6 +5,7 @@ import { MealPlannerGrid } from "./meal-planner-grid";
 import { ClearAllButton } from "./clear-all-button";
 import { Button } from "@/components/ui/button";
 import { PageWrapper } from "@/components/page-wrapper";
+import { PageHeader } from "@/components/page-header";
 
 export default async function PlanPage() {
   const [weeklyPlan, recipes] = await Promise.all([
@@ -16,7 +17,7 @@ export default async function PlanPage() {
 
   return (
     <PageWrapper>
-      <div className="mb-6 flex items-center justify-between">
+      <PageHeader>
         <h1 className="text-2xl font-bold">Meal Planner</h1>
         <div className="flex gap-2">
           <ClearAllButton weeklyPlanId={weeklyPlan.id} disabled={!hasMeals} />
@@ -27,7 +28,7 @@ export default async function PlanPage() {
             </Button>
           </Link>
         </div>
-      </div>
+      </PageHeader>
       <p className="mb-8 text-muted-foreground">
         Plan your meals for the week, then generate a shopping list.
       </p>
