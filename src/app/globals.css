@@ -294,9 +294,7 @@
 }
 
 /* Screen-only utility (hidden on print, visible on screen) */
-.screen-only {
-  display: block;
-}
+/* Note: Don't set display here - let elements keep their natural display value */
 
 @media print {
   .screen-only {

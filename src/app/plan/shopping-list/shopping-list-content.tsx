@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Plus, ShoppingCart, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Share2, ShoppingCart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -167,6 +167,55 @@ export function ShoppingListContent({
     return item.quantity.toString();
   };
 
+  const formatListForSharing = () => {
+    const lines: string[] = [];
+
+    for (const combinedItem of sortedItems) {
+      if (combinedItem.type === "recipe") {
+        const item = combinedItem.item;
+        const qty = formatQuantity(item);
+        lines.push(`• ${item.productName} (${qty})`);
+      } else {
+        const item = combinedItem.item;
+        const qty = formatCustomQuantity(item);
+        if (qty) {
+          lines.push(`• ${item.name} (${qty})`);
+        } else {
+          lines.push(`• ${item.name}`);
+        }
+      }
+    }
+
+    return lines.join("\n");
+  };
+
+  const handleShare = async () => {
+    const text = formatListForSharing();
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Shopping List - Week of ${formatDate(weekStartDate)}`,
+          text,
+        });
+      } catch (error) {
+        // User cancelled or share failed - ignore AbortError
+        if (error instanceof Error && error.name !== "AbortError") {
+          console.error("Share failed:", error);
+        }
+      }
+    } else {
+      // Fallback to clipboard
+      try {
+        await navigator.clipboard.writeText(text);
+        alert("Shopping list copied to clipboard!");
+      } catch (error) {
+        console.error("Clipboard write failed:", error);
+        alert("Failed to copy to clipboard");
+      }
+    }
+  };
+
   const onSubmit = (values: AddItemFormValues) => {
     startTransition(async () => {
       await addCustomItem({
@@ -197,6 +246,14 @@ export function ShoppingListContent({
           </div>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleShare}
+            disabled={totalItemCount === 0}
+          >
+            <Share2 className="mr-1 h-4 w-4" />
+            Share
+          </Button>
           {customItems.length > 0 && (
             <Button
               variant="outline"
