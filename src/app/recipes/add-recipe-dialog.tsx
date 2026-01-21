@@ -124,7 +124,10 @@ export function AddRecipeDialog({ products }: AddRecipeDialogProps) {
           Add Recipe
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
+      <DialogContent
+        className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Add New Recipe</DialogTitle>
         </DialogHeader>
