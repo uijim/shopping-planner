@@ -10,6 +10,7 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
+import { NavLinks } from "@/components/nav-links";
 import { ShoppingCart } from "lucide-react";
 import "./globals.css";
 
@@ -47,14 +48,7 @@ export default function RootLayout({
                 </span>
                 Shopping Planner
               </Link>
-              <nav className="flex items-center gap-4">
-                <Link href="/plan" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-                  Plan
-                </Link>
-                <Link href="/recipes" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-                  Recipes
-                </Link>
-              </nav>
+              <NavLinks />
             </div>
             <div className="flex gap-4">
               <SignedOut>
