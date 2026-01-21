@@ -217,7 +217,7 @@ export function ShoppingListContent({
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button>
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="mr-1 h-4 w-4" />
               Add Item
             </Button>
           </DialogTrigger>
@@ -331,7 +331,7 @@ export function ShoppingListContent({
                 <Button variant="outline">Go to Meal Planner</Button>
               </Link>
               <Button onClick={() => setDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="mr-1 h-4 w-4" />
                 Add Item
               </Button>
             </div>

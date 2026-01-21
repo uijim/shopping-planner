@@ -21,7 +21,7 @@ export default async function PlanPage() {
           <ClearAllButton weeklyPlanId={weeklyPlan.id} disabled={!hasMeals} />
           <Link href="/plan/shopping-list">
             <Button disabled={!hasMeals}>
-              <ShoppingCart className="mr-2 h-4 w-4" />
+              <ShoppingCart className="mr-1 h-4 w-4" />
               Generate Shopping List
             </Button>
           </Link>

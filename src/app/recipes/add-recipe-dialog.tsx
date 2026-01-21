@@ -120,7 +120,7 @@ export function AddRecipeDialog({ products }: AddRecipeDialogProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className="mr-1 h-4 w-4" />
           Add Recipe
         </Button>
       </DialogTrigger>
