@@ -8,6 +8,7 @@ const navItems = [
   { href: "/plan", label: "Plan" },
   { href: "/recipes", label: "Recipes" },
   { href: "/saved-items", label: "Saved Items" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export function NavLinks() {

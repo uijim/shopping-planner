@@ -11,6 +11,7 @@ import {
 } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { NavLinks } from "@/components/nav-links";
+import { ThemeProvider } from "@/components/theme-provider";
 import { ShoppingCart } from "lucide-react";
 import "./globals.css";
 
@@ -36,10 +37,16 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
           <header className="flex items-center justify-between p-4 print-hidden">
             <div className="flex items-center gap-8">
               <Link href="/" className="flex items-center gap-2 text-xl font-semibold">
@@ -65,6 +72,7 @@ export default function RootLayout({
             </div>
           </header>
           {children}
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>
