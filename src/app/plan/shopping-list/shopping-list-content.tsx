@@ -307,11 +307,11 @@ export function ShoppingListContent({
         </Card>
       ) : (
         <div className="space-y-4">
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground screen-only">
             {totalItemCount} item{totalItemCount !== 1 ? "s" : ""}
           </p>
 
-          <Card>
+          <Card className="print-no-chrome">
             <CardContent className="pt-6">
               <ul className="space-y-3">
                 {sortedItems.map((combinedItem) => {

@@ -313,4 +313,22 @@
   .print-only {
     display: block !important;
   }
+
+  /* Remove border and background for print-optimized cards */
+  .print-no-chrome {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  /* Remove min-height to prevent blank pages */
+  .min-h-screen {
+    min-height: auto !important;
+  }
+
+  /* Remove padding/margin that can cause blank pages */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
 }
