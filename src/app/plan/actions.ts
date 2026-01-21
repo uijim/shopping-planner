@@ -2,8 +2,13 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { weeklyPlans, mealSlots, customShoppingItems } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import {
+  weeklyPlans,
+  mealSlots,
+  customShoppingItems,
+  savedShoppingItems,
+} from "@/db/schema";
+import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 // Get Monday of current week
@@ -177,7 +182,6 @@ export async function clearAllMeals(weeklyPlanId: string) {
 export interface ShoppingListItem {
   productId: string;
   productName: string;
-  category: string;
   totalBaseQuantity: number;
   baseUnit: "g" | "ml" | "unit";
   displayQuantity: number;
@@ -220,7 +224,6 @@ export async function getShoppingListForPlan(weeklyPlanId: string) {
     {
       productId: string;
       productName: string;
-      category: string;
       totalBaseQuantity: number;
       baseUnit: "g" | "ml" | "unit";
       displayUnit: string;
@@ -244,7 +247,6 @@ export async function getShoppingListForPlan(weeklyPlanId: string) {
         aggregated.set(key, {
           productId: rp.productId,
           productName: rp.product.name,
-          category: rp.product.category ?? "Other",
           totalBaseQuantity: scaledQuantity,
           baseUnit: rp.baseUnit,
           displayUnit: rp.unit,
@@ -261,13 +263,8 @@ export async function getShoppingListForPlan(weeklyPlanId: string) {
     })
   );
 
-  // Sort by category then by name
-  items.sort((a, b) => {
-    if (a.category !== b.category) {
-      return a.category.localeCompare(b.category);
-    }
-    return a.productName.localeCompare(b.productName);
-  });
+  // Sort alphabetically by name
+  items.sort((a, b) => a.productName.localeCompare(b.productName));
 
   return { items, weekStartDate: plan.weekStartDate };
 }
@@ -282,7 +279,6 @@ export interface CustomShoppingItemData {
   name: string;
   quantity: number | null;
   unit: string | null;
-  category: string;
   isChecked: boolean;
 }
 
@@ -305,7 +301,7 @@ export async function getCustomItemsForPlan(
 
   const items = await db.query.customShoppingItems.findMany({
     where: eq(customShoppingItems.weeklyPlanId, weeklyPlanId),
-    orderBy: (items, { asc }) => [asc(items.category), asc(items.name)],
+    orderBy: (items, { asc }) => [asc(items.name)],
   });
 
   return items.map((item) => ({
@@ -313,7 +309,6 @@ export async function getCustomItemsForPlan(
     name: item.name,
     quantity: item.quantity,
     unit: item.unit,
-    category: item.category,
     isChecked: item.isChecked,
   }));
 }
@@ -323,7 +318,6 @@ interface AddCustomItemInput {
   name: string;
   quantity?: number;
   unit?: string;
-  category?: string;
 }
 
 export async function addCustomItem(input: AddCustomItemInput) {
@@ -346,7 +340,6 @@ export async function addCustomItem(input: AddCustomItemInput) {
     name: input.name,
     quantity: input.quantity ?? null,
     unit: input.unit ?? null,
-    category: input.category ?? "Other",
   });
 
   revalidatePath("/plan/shopping-list");
@@ -419,6 +412,55 @@ export async function clearAllCustomItems(weeklyPlanId: string) {
   await db
     .delete(customShoppingItems)
     .where(eq(customShoppingItems.weeklyPlanId, weeklyPlanId));
+
+  revalidatePath("/plan/shopping-list");
+}
+
+interface BulkAddFromSavedInput {
+  weeklyPlanId: string;
+  savedItemIds: string[];
+}
+
+export async function bulkAddFromSaved(input: BulkAddFromSavedInput) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  if (input.savedItemIds.length === 0) {
+    return;
+  }
+
+  // Verify the weekly plan belongs to the user
+  const plan = await db.query.weeklyPlans.findFirst({
+    where: eq(weeklyPlans.id, input.weeklyPlanId),
+  });
+
+  if (!plan || plan.userId !== userId) {
+    throw new Error("Weekly plan not found");
+  }
+
+  // Fetch saved items (verify user owns them)
+  const savedItems = await db.query.savedShoppingItems.findMany({
+    where: and(
+      inArray(savedShoppingItems.id, input.savedItemIds),
+      eq(savedShoppingItems.userId, userId)
+    ),
+  });
+
+  if (savedItems.length === 0) {
+    return;
+  }
+
+  // Insert as customShoppingItems for the week
+  await db.insert(customShoppingItems).values(
+    savedItems.map((item) => ({
+      weeklyPlanId: input.weeklyPlanId,
+      name: item.name,
+      quantity: item.quantity,
+      unit: item.unit,
+    }))
+  );
 
   revalidatePath("/plan/shopping-list");
 }

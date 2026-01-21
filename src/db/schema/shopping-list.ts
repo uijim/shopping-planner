@@ -43,7 +43,6 @@ export const customShoppingItems = pgTable("custom_shopping_items", {
   name: text("name").notNull(),
   quantity: real("quantity"),
   unit: text("unit"),
-  category: text("category").notNull().default("Other"),
   isChecked: boolean("is_checked").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

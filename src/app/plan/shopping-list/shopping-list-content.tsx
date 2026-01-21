@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -22,43 +22,24 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { ShoppingListItem, CustomShoppingItemData } from "../actions";
+import type { SavedItemData } from "@/app/saved-items/actions";
 import {
   addCustomItem,
   removeCustomItem,
   toggleCustomItemChecked,
   clearAllCustomItems,
 } from "../actions";
-
-const CATEGORIES = [
-  "Produce",
-  "Dairy",
-  "Meat & Seafood",
-  "Bakery",
-  "Pantry",
-  "Frozen",
-  "Beverages",
-  "Snacks",
-  "Household",
-  "Other",
-];
+import { AddFromSavedModal } from "./add-from-saved-modal";
 
 const addItemSchema = z.object({
   name: z.string().min(1, "Item name is required"),
   quantity: z.string().optional(),
   unit: z.string().optional(),
-  category: z.string(),
 });
 
 type AddItemFormValues = z.infer<typeof addItemSchema>;
@@ -66,6 +47,7 @@ type AddItemFormValues = z.infer<typeof addItemSchema>;
 interface ShoppingListContentProps {
   items: ShoppingListItem[];
   customItems: CustomShoppingItemData[];
+  savedItems: SavedItemData[];
   weekStartDate: string;
   weeklyPlanId: string;
 }
@@ -73,6 +55,7 @@ interface ShoppingListContentProps {
 export function ShoppingListContent({
   items,
   customItems,
+  savedItems,
   weekStartDate,
   weeklyPlanId,
 }: ShoppingListContentProps) {
@@ -86,7 +69,6 @@ export function ShoppingListContent({
       name: "",
       quantity: "",
       unit: "",
-      category: "Other",
     },
   });
 
@@ -95,33 +77,26 @@ export function ShoppingListContent({
     customItems.filter((item) => item.isChecked).map((item) => `custom-${item.id}`)
   );
 
-  // Combine recipe items with custom items for grouping
+  // Combine recipe items with custom items
   type CombinedItem =
-    | { type: "recipe"; item: ShoppingListItem }
-    | { type: "custom"; item: CustomShoppingItemData };
+    | { type: "recipe"; item: ShoppingListItem; sortName: string }
+    | { type: "custom"; item: CustomShoppingItemData; sortName: string };
 
   const allItems: CombinedItem[] = [
-    ...items.map((item) => ({ type: "recipe" as const, item })),
-    ...customItems.map((item) => ({ type: "custom" as const, item })),
+    ...items.map((item) => ({
+      type: "recipe" as const,
+      item,
+      sortName: item.productName.toLowerCase(),
+    })),
+    ...customItems.map((item) => ({
+      type: "custom" as const,
+      item,
+      sortName: item.name.toLowerCase(),
+    })),
   ];
 
-  // Group items by category
-  const itemsByCategory = allItems.reduce(
-    (acc, combinedItem) => {
-      const category =
-        combinedItem.type === "recipe"
-          ? combinedItem.item.category
-          : combinedItem.item.category;
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(combinedItem);
-      return acc;
-    },
-    {} as Record<string, CombinedItem[]>
-  );
-
-  const categories = Object.keys(itemsByCategory).sort();
+  // Sort alphabetically by name
+  const sortedItems = allItems.sort((a, b) => a.sortName.localeCompare(b.sortName));
   const totalItemCount = items.length + customItems.length;
 
   const formatDate = (dateString: string) => {
@@ -199,7 +174,6 @@ export function ShoppingListContent({
         name: values.name,
         quantity: values.quantity ? parseFloat(values.quantity) : undefined,
         unit: values.unit || undefined,
-        category: values.category,
       });
       form.reset();
       setDialogOpen(false);
@@ -233,6 +207,7 @@ export function ShoppingListContent({
               {isPending ? "Clearing..." : "Clear custom"}
             </Button>
           )}
+          <AddFromSavedModal savedItems={savedItems} weeklyPlanId={weeklyPlanId} />
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -292,33 +267,6 @@ export function ShoppingListContent({
                     )}
                   />
                 </div>
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {CATEGORIES.map((category) => (
-                            <SelectItem key={category} value={category}>
-                              {category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <div className="flex justify-end gap-2">
                   <Button
                     type="button"
@@ -358,95 +306,89 @@ export function ShoppingListContent({
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <p className="text-muted-foreground">
-            {totalItemCount} item{totalItemCount !== 1 ? "s" : ""} across{" "}
-            {categories.length} categor{categories.length !== 1 ? "ies" : "y"}
+            {totalItemCount} item{totalItemCount !== 1 ? "s" : ""}
           </p>
 
-          {categories.map((category) => (
-            <Card key={category}>
-              <CardHeader>
-                <CardTitle className="text-lg">{category}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {itemsByCategory[category].map((combinedItem) => {
-                    if (combinedItem.type === "recipe") {
-                      const item = combinedItem.item;
-                      const itemKey = `${item.productId}-${item.baseUnit}`;
-                      const isChecked = checkedItems.has(itemKey);
+          <Card>
+            <CardContent className="pt-6">
+              <ul className="space-y-3">
+                {sortedItems.map((combinedItem) => {
+                  if (combinedItem.type === "recipe") {
+                    const item = combinedItem.item;
+                    const itemKey = `${item.productId}-${item.baseUnit}`;
+                    const isChecked = checkedItems.has(itemKey);
 
-                      return (
-                        <li key={itemKey} className="flex items-center gap-3">
-                          <Checkbox
-                            id={itemKey}
-                            checked={isChecked}
-                            onCheckedChange={() => toggleItem(itemKey)}
-                          />
-                          <label
-                            htmlFor={itemKey}
-                            className={`flex-1 cursor-pointer ${
-                              isChecked
-                                ? "text-muted-foreground line-through"
-                                : ""
-                            }`}
-                          >
-                            <span className="font-medium">{item.productName}</span>
+                    return (
+                      <li key={itemKey} className="flex items-center gap-3">
+                        <Checkbox
+                          id={itemKey}
+                          checked={isChecked}
+                          onCheckedChange={() => toggleItem(itemKey)}
+                        />
+                        <label
+                          htmlFor={itemKey}
+                          className={`flex-1 cursor-pointer ${
+                            isChecked
+                              ? "text-muted-foreground line-through"
+                              : ""
+                          }`}
+                        >
+                          <span className="font-medium">{item.productName}</span>
+                          <span className="ml-2 text-muted-foreground">
+                            {formatQuantity(item)}
+                          </span>
+                        </label>
+                      </li>
+                    );
+                  } else {
+                    const item = combinedItem.item;
+                    const itemKey = `custom-${item.id}`;
+                    const isChecked =
+                      item.isChecked || customCheckedState.has(itemKey);
+
+                    return (
+                      <li key={itemKey} className="flex items-center gap-3">
+                        <Checkbox
+                          id={itemKey}
+                          checked={isChecked}
+                          onCheckedChange={() =>
+                            handleToggleCustomItem(item.id, item.isChecked)
+                          }
+                          disabled={isPending}
+                        />
+                        <label
+                          htmlFor={itemKey}
+                          className={`flex-1 cursor-pointer ${
+                            isChecked
+                              ? "text-muted-foreground line-through"
+                              : ""
+                          }`}
+                        >
+                          <span className="font-medium">{item.name}</span>
+                          {formatCustomQuantity(item) && (
                             <span className="ml-2 text-muted-foreground">
-                              {formatQuantity(item)}
+                              {formatCustomQuantity(item)}
                             </span>
-                          </label>
-                        </li>
-                      );
-                    } else {
-                      const item = combinedItem.item;
-                      const itemKey = `custom-${item.id}`;
-                      const isChecked =
-                        item.isChecked || customCheckedState.has(itemKey);
-
-                      return (
-                        <li key={itemKey} className="flex items-center gap-3">
-                          <Checkbox
-                            id={itemKey}
-                            checked={isChecked}
-                            onCheckedChange={() =>
-                              handleToggleCustomItem(item.id, item.isChecked)
-                            }
-                            disabled={isPending}
-                          />
-                          <label
-                            htmlFor={itemKey}
-                            className={`flex-1 cursor-pointer ${
-                              isChecked
-                                ? "text-muted-foreground line-through"
-                                : ""
-                            }`}
-                          >
-                            <span className="font-medium">{item.name}</span>
-                            {formatCustomQuantity(item) && (
-                              <span className="ml-2 text-muted-foreground">
-                                {formatCustomQuantity(item)}
-                              </span>
-                            )}
-                          </label>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive screen-only"
-                            onClick={() => handleRemoveCustomItem(item.id)}
-                            disabled={isPending}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </li>
-                      );
-                    }
-                  })}
-                </ul>
-              </CardContent>
-            </Card>
-          ))}
+                          )}
+                        </label>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive screen-only"
+                          onClick={() => handleRemoveCustomItem(item.id)}
+                          disabled={isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </li>
+                    );
+                  }
+                })}
+              </ul>
+            </CardContent>
+          </Card>
         </div>
       )}
     </>
