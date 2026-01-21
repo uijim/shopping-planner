@@ -4,6 +4,7 @@ import {
   getCustomItemsForPlan,
 } from "../actions";
 import { ShoppingListContent } from "./shopping-list-content";
+import { PageWrapper } from "@/components/page-wrapper";
 
 export default async function ShoppingListPage() {
   const weeklyPlan = await getOrCreateWeeklyPlan();
@@ -13,13 +14,13 @@ export default async function ShoppingListPage() {
   ]);
 
   return (
-    <main className="flex min-h-screen flex-col p-8">
+    <PageWrapper>
       <ShoppingListContent
         items={items}
         customItems={customItems}
         weekStartDate={weekStartDate}
         weeklyPlanId={weeklyPlan.id}
       />
-    </main>
+    </PageWrapper>
   );
 }

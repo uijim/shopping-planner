@@ -4,6 +4,7 @@ import { getOrCreateWeeklyPlan, getRecipesForSelection } from "./actions";
 import { MealPlannerGrid } from "./meal-planner-grid";
 import { ClearAllButton } from "./clear-all-button";
 import { Button } from "@/components/ui/button";
+import { PageWrapper } from "@/components/page-wrapper";
 
 export default async function PlanPage() {
   const [weeklyPlan, recipes] = await Promise.all([
@@ -14,7 +15,7 @@ export default async function PlanPage() {
   const hasMeals = weeklyPlan.mealSlots.length > 0;
 
   return (
-    <main className="flex min-h-screen flex-col p-8">
+    <PageWrapper>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Meal Planner</h1>
         <div className="flex gap-2">
@@ -36,6 +37,6 @@ export default async function PlanPage() {
         mealSlots={weeklyPlan.mealSlots}
         recipes={recipes}
       />
-    </main>
+    </PageWrapper>
   );
 }
