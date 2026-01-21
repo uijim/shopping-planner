@@ -154,6 +154,26 @@ export async function removeMealSlot(slotId: string) {
   revalidatePath("/plan");
 }
 
+export async function clearAllMeals(weeklyPlanId: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  // Verify the weekly plan belongs to the user
+  const plan = await db.query.weeklyPlans.findFirst({
+    where: eq(weeklyPlans.id, weeklyPlanId),
+  });
+
+  if (!plan || plan.userId !== userId) {
+    throw new Error("Weekly plan not found");
+  }
+
+  await db.delete(mealSlots).where(eq(mealSlots.weeklyPlanId, weeklyPlanId));
+
+  revalidatePath("/plan");
+}
+
 export interface ShoppingListItem {
   productId: string;
   productName: string;
