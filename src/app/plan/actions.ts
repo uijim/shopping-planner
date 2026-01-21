@@ -400,3 +400,25 @@ export async function toggleCustomItemChecked(itemId: string, isChecked: boolean
 
   revalidatePath("/plan/shopping-list");
 }
+
+export async function clearAllCustomItems(weeklyPlanId: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  // Verify the weekly plan belongs to the user
+  const plan = await db.query.weeklyPlans.findFirst({
+    where: eq(weeklyPlans.id, weeklyPlanId),
+  });
+
+  if (!plan || plan.userId !== userId) {
+    throw new Error("Weekly plan not found");
+  }
+
+  await db
+    .delete(customShoppingItems)
+    .where(eq(customShoppingItems.weeklyPlanId, weeklyPlanId));
+
+  revalidatePath("/plan/shopping-list");
+}

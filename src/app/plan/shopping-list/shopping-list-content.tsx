@@ -38,6 +38,7 @@ import {
   addCustomItem,
   removeCustomItem,
   toggleCustomItemChecked,
+  clearAllCustomItems,
 } from "../actions";
 
 const CATEGORIES = [
@@ -156,6 +157,12 @@ export function ShoppingListContent({
     });
   };
 
+  const handleClearAllCustomItems = () => {
+    startTransition(async () => {
+      await clearAllCustomItems(weeklyPlanId);
+    });
+  };
+
   const formatQuantity = (item: ShoppingListItem) => {
     const qty = item.displayQuantity;
     const unit = item.baseUnit;
@@ -215,13 +222,24 @@ export function ShoppingListContent({
             </p>
           </div>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-1 h-4 w-4" />
-              Add Item
+        <div className="flex gap-2">
+          {customItems.length > 0 && (
+            <Button
+              variant="outline"
+              onClick={handleClearAllCustomItems}
+              disabled={isPending}
+            >
+              <Trash2 className="mr-1 h-4 w-4" />
+              {isPending ? "Clearing..." : "Clear custom"}
             </Button>
-          </DialogTrigger>
+          )}
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-1 h-4 w-4" />
+                Add Item
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add Custom Item</DialogTitle>
@@ -316,7 +334,8 @@ export function ShoppingListContent({
               </form>
             </Form>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </PageHeader>
 
       {totalItemCount === 0 ? (
