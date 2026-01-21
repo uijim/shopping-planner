@@ -56,7 +56,7 @@ const addItemSchema = z.object({
   name: z.string().min(1, "Item name is required"),
   quantity: z.string().optional(),
   unit: z.string().optional(),
-  category: z.string().default("Other"),
+  category: z.string(),
 });
 
 type AddItemFormValues = z.infer<typeof addItemSchema>;

@@ -224,7 +224,7 @@ export async function getShoppingListForPlan(weeklyPlanId: string) {
         aggregated.set(key, {
           productId: rp.productId,
           productName: rp.product.name,
-          category: rp.product.category,
+          category: rp.product.category ?? "Other",
           totalBaseQuantity: scaledQuantity,
           baseUnit: rp.baseUnit,
           displayUnit: rp.unit,

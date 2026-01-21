@@ -34,14 +34,14 @@ import type { Product } from "@/db/schema";
 
 const ingredientSchema = z.object({
   productId: z.string().min(1, "Select a product"),
-  quantity: z.coerce.number().positive("Quantity must be positive"),
+  quantity: z.number().positive("Quantity must be positive"),
   unit: z.string().min(1, "Select a unit"),
 });
 
 const recipeSchema = z.object({
   name: z.string().min(1, "Recipe name is required"),
   description: z.string().optional(),
-  servings: z.coerce.number().int().positive().default(4),
+  servings: z.number().int().positive(),
   ingredients: z
     .array(ingredientSchema)
     .min(1, "At least one ingredient is required"),
@@ -215,7 +215,12 @@ export function EditRecipeDialog({
                 <FormItem>
                   <FormLabel>Servings</FormLabel>
                   <FormControl>
-                    <Input type="number" min={1} {...field} />
+                    <Input
+                      type="number"
+                      min={1}
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -285,6 +290,7 @@ export function EditRecipeDialog({
                             step="any"
                             placeholder="Qty"
                             {...field}
+                            onChange={(e) => field.onChange(e.target.valueAsNumber)}
                           />
                         </FormControl>
                         <FormMessage />
