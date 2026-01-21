@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { EditRecipeDialog } from "./edit-recipe-dialog";
 import type { Product } from "@/db/schema";
 
@@ -29,6 +31,15 @@ interface RecipeListProps {
 export function RecipeList({ recipes, products }: RecipeListProps) {
   const [selectedRecipe, setSelectedRecipe] =
     useState<RecipeWithIngredients | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredRecipes = recipes.filter((recipe) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      recipe.name.toLowerCase().includes(query) ||
+      recipe.description?.toLowerCase().includes(query)
+    );
+  });
 
   if (recipes.length === 0) {
     return (
@@ -45,8 +56,26 @@ export function RecipeList({ recipes, products }: RecipeListProps) {
 
   return (
     <>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {recipes.map((recipe) => (
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Search recipes..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+
+      {filteredRecipes.length === 0 ? (
+        <div className="flex flex-1 flex-col items-center justify-center py-12 text-center">
+          <p className="text-muted-foreground">
+            No recipes found matching &quot;{searchQuery}&quot;
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredRecipes.map((recipe) => (
           <Card
             key={recipe.id}
             className="cursor-pointer transition-colors hover:bg-accent"
@@ -72,8 +101,9 @@ export function RecipeList({ recipes, products }: RecipeListProps) {
               </p>
             </CardContent>
           </Card>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {selectedRecipe && (
         <EditRecipeDialog

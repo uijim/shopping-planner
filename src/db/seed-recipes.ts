@@ -3,7 +3,7 @@ config({ path: ".env.local" });
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { eq, isNull } from "drizzle-orm";
+import { isNull } from "drizzle-orm";
 import { recipes, recipeProducts } from "./schema/recipes";
 import { products } from "./schema/products";
 
