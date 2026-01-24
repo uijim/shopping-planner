@@ -7,12 +7,12 @@ import {
   SignUpButton,
   SignedIn,
   SignedOut,
-  UserButton,
 } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { NavLinks } from "@/components/nav-links";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ShoppingCart } from "lucide-react";
+import { UserMenu } from "@/components/user-menu";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -67,7 +67,7 @@ export default function RootLayout({
               </SignUpButton>
             </SignedOut>
             <SignedIn>
-              <UserButton />
+              <UserMenu />
             </SignedIn>
             </div>
           </header>

@@ -17,7 +17,6 @@ import { useState } from "react";
 const navItems = [
   { href: "/recipes", label: "Recipes" },
   { href: "/saved-items", label: "Saved Items" },
-  { href: "/settings", label: "Settings" },
 ];
 
 export function NavLinks() {
