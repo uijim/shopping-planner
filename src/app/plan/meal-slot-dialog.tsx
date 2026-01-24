@@ -137,7 +137,7 @@ export function MealSlotDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px]" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>
             {DAYS[dayOfWeek]} - {MEAL_LABELS[mealType]}
@@ -218,19 +218,20 @@ export function MealSlotDialog({
           </div>
         </div>
 
-        <div className="flex justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
           {currentSlot?.id && currentSlot.mealSlotRecipes.length > 0 ? (
             <Button
               variant="destructive"
               onClick={handleRemoveAll}
               disabled={isRemoving || isSubmitting}
+              className="order-last sm:order-first"
             >
               {isRemoving ? "Removing..." : "Remove All"}
             </Button>
           ) : (
-            <div />
+            <div className="hidden sm:block" />
           )}
-          <div className="flex gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>

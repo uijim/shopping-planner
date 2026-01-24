@@ -171,12 +171,12 @@ export function EditRecipeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
+      <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-[600px]" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Edit Recipe</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-1 flex-col space-y-6 overflow-y-auto">
             <FormField
               control={form.control}
               name="name"
@@ -338,16 +338,17 @@ export function EditRecipeDialog({
               ))}
             </div>
 
-            <div className="flex justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
               <Button
                 type="button"
                 variant="destructive"
                 onClick={handleDelete}
                 disabled={isDeleting || isSubmitting}
+                className="order-last sm:order-first"
               >
                 {isDeleting ? "Deleting..." : "Delete"}
               </Button>
-              <div className="flex gap-2">
+              <div className="flex flex-col-reverse gap-2 sm:flex-row">
                 <Button
                   type="button"
                   variant="outline"

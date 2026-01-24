@@ -79,7 +79,7 @@ export function EditSavedItemDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Edit Saved Item</DialogTitle>
         </DialogHeader>
@@ -131,7 +131,7 @@ export function EditSavedItemDialog({
                 )}
               />
             </div>
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button
                 type="button"
                 variant="outline"

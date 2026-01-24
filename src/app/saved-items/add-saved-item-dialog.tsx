@@ -65,7 +65,7 @@ export function AddSavedItemDialog() {
           Add Saved Item
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Add Saved Item</DialogTitle>
         </DialogHeader>
@@ -117,7 +117,7 @@ export function AddSavedItemDialog() {
                 )}
               />
             </div>
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button
                 type="button"
                 variant="outline"
