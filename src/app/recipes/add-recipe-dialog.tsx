@@ -140,7 +140,7 @@ export function AddRecipeDialog({ products }: AddRecipeDialogProps) {
                 <FormItem>
                   <FormLabel>Recipe Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Spaghetti Bolognese" {...field} />
+                    <Input placeholder="e.g., Spaghetti Bolognese" autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

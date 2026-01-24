@@ -92,7 +92,7 @@ export function EditSavedItemDialog({
                 <FormItem>
                   <FormLabel>Item Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Bread" {...field} />
+                    <Input placeholder="e.g., Bread" autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
