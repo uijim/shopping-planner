@@ -27,6 +27,14 @@ export function AddFromSavedModal({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isPending, startTransition] = useTransition();
 
+  const handleOpenChange = (isOpen: boolean) => {
+    if (isOpen) {
+      // Pre-select all items when opening the modal
+      setSelectedIds(new Set(savedItems.map((item) => item.id)));
+    }
+    setOpen(isOpen);
+  };
+
   // Sort items alphabetically
   const sortedItems = [...savedItems].sort((a, b) =>
     a.name.toLowerCase().localeCompare(b.name.toLowerCase())
@@ -74,7 +82,7 @@ export function AddFromSavedModal({
   const allSelected = selectedIds.size === savedItems.length && savedItems.length > 0;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" disabled={savedItems.length === 0}>
           <Star className="mr-1 h-4 w-4" />
