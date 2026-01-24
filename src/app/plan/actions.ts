@@ -5,6 +5,7 @@ import { db } from "@/db";
 import {
   weeklyPlans,
   mealSlots,
+  mealSlotRecipes,
   customShoppingItems,
   savedShoppingItems,
 } from "@/db/schema";
@@ -37,7 +38,12 @@ export async function getOrCreateWeeklyPlan() {
     with: {
       mealSlots: {
         with: {
-          recipe: true,
+          mealSlotRecipes: {
+            with: {
+              recipe: true,
+            },
+            orderBy: (msr, { asc }) => [asc(msr.sortOrder)],
+          },
         },
       },
     },
@@ -76,12 +82,16 @@ export async function getRecipesForSelection() {
   });
 }
 
+interface RecipeInSlot {
+  recipeId: string;
+  servings: number;
+}
+
 interface SetMealSlotInput {
   weeklyPlanId: string;
   dayOfWeek: number; // 0-6 (Monday-Sunday in our UI)
   mealType: "breakfast" | "lunch" | "dinner";
-  recipeId: string | null;
-  servings: number;
+  recipes: RecipeInSlot[];
 }
 
 export async function setMealSlot(input: SetMealSlotInput) {
@@ -108,30 +118,190 @@ export async function setMealSlot(input: SetMealSlotInput) {
     ),
   });
 
-  if (existingSlot) {
-    // Update existing slot
-    if (input.recipeId) {
-      await db
-        .update(mealSlots)
-        .set({
-          recipeId: input.recipeId,
-          servings: input.servings,
-        })
-        .where(eq(mealSlots.id, existingSlot.id));
-    } else {
-      // Remove the slot if no recipe selected
+  if (input.recipes.length === 0) {
+    // Remove the slot if no recipes
+    if (existingSlot) {
       await db.delete(mealSlots).where(eq(mealSlots.id, existingSlot.id));
     }
-  } else if (input.recipeId) {
-    // Create new slot
-    await db.insert(mealSlots).values({
-      weeklyPlanId: input.weeklyPlanId,
-      dayOfWeek: input.dayOfWeek,
-      mealType: input.mealType,
-      recipeId: input.recipeId,
-      servings: input.servings,
-    });
+  } else if (existingSlot) {
+    // Update existing slot: delete old recipes and insert new ones
+    await db
+      .delete(mealSlotRecipes)
+      .where(eq(mealSlotRecipes.mealSlotId, existingSlot.id));
+
+    await db.insert(mealSlotRecipes).values(
+      input.recipes.map((r, index) => ({
+        mealSlotId: existingSlot.id,
+        recipeId: r.recipeId,
+        servings: r.servings,
+        sortOrder: index,
+      }))
+    );
+  } else {
+    // Create new slot with recipes
+    const [newSlot] = await db
+      .insert(mealSlots)
+      .values({
+        weeklyPlanId: input.weeklyPlanId,
+        dayOfWeek: input.dayOfWeek,
+        mealType: input.mealType,
+      })
+      .returning();
+
+    await db.insert(mealSlotRecipes).values(
+      input.recipes.map((r, index) => ({
+        mealSlotId: newSlot.id,
+        recipeId: r.recipeId,
+        servings: r.servings,
+        sortOrder: index,
+      }))
+    );
   }
+
+  revalidatePath("/plan");
+}
+
+interface AddRecipeToSlotInput {
+  weeklyPlanId: string;
+  dayOfWeek: number;
+  mealType: "breakfast" | "lunch" | "dinner";
+  recipeId: string;
+  servings: number;
+}
+
+export async function addRecipeToSlot(input: AddRecipeToSlotInput) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  // Verify the weekly plan belongs to the user
+  const plan = await db.query.weeklyPlans.findFirst({
+    where: eq(weeklyPlans.id, input.weeklyPlanId),
+  });
+
+  if (!plan || plan.userId !== userId) {
+    throw new Error("Weekly plan not found");
+  }
+
+  // Find or create the meal slot
+  let slot = await db.query.mealSlots.findFirst({
+    where: and(
+      eq(mealSlots.weeklyPlanId, input.weeklyPlanId),
+      eq(mealSlots.dayOfWeek, input.dayOfWeek),
+      eq(mealSlots.mealType, input.mealType)
+    ),
+    with: {
+      mealSlotRecipes: true,
+    },
+  });
+
+  if (!slot) {
+    const [newSlot] = await db
+      .insert(mealSlots)
+      .values({
+        weeklyPlanId: input.weeklyPlanId,
+        dayOfWeek: input.dayOfWeek,
+        mealType: input.mealType,
+      })
+      .returning();
+    slot = { ...newSlot, mealSlotRecipes: [] };
+  }
+
+  // Get the next sort order
+  const maxSortOrder = slot.mealSlotRecipes.reduce(
+    (max, r) => Math.max(max, r.sortOrder),
+    -1
+  );
+
+  // Add the recipe
+  await db.insert(mealSlotRecipes).values({
+    mealSlotId: slot.id,
+    recipeId: input.recipeId,
+    servings: input.servings,
+    sortOrder: maxSortOrder + 1,
+  });
+
+  revalidatePath("/plan");
+}
+
+interface RemoveRecipeFromSlotInput {
+  mealSlotRecipeId: string;
+}
+
+export async function removeRecipeFromSlot(input: RemoveRecipeFromSlotInput) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  // Get the meal slot recipe and verify ownership
+  const mealSlotRecipe = await db.query.mealSlotRecipes.findFirst({
+    where: eq(mealSlotRecipes.id, input.mealSlotRecipeId),
+    with: {
+      mealSlot: {
+        with: {
+          weeklyPlan: true,
+        },
+      },
+    },
+  });
+
+  if (!mealSlotRecipe || mealSlotRecipe.mealSlot.weeklyPlan.userId !== userId) {
+    throw new Error("Meal slot recipe not found");
+  }
+
+  const mealSlotId = mealSlotRecipe.mealSlotId;
+
+  // Delete the recipe from the slot
+  await db
+    .delete(mealSlotRecipes)
+    .where(eq(mealSlotRecipes.id, input.mealSlotRecipeId));
+
+  // Check if the slot has any remaining recipes
+  const remainingRecipes = await db.query.mealSlotRecipes.findMany({
+    where: eq(mealSlotRecipes.mealSlotId, mealSlotId),
+  });
+
+  // If no recipes left, delete the slot
+  if (remainingRecipes.length === 0) {
+    await db.delete(mealSlots).where(eq(mealSlots.id, mealSlotId));
+  }
+
+  revalidatePath("/plan");
+}
+
+interface UpdateRecipeServingsInput {
+  mealSlotRecipeId: string;
+  servings: number;
+}
+
+export async function updateRecipeServings(input: UpdateRecipeServingsInput) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  // Get the meal slot recipe and verify ownership
+  const mealSlotRecipe = await db.query.mealSlotRecipes.findFirst({
+    where: eq(mealSlotRecipes.id, input.mealSlotRecipeId),
+    with: {
+      mealSlot: {
+        with: {
+          weeklyPlan: true,
+        },
+      },
+    },
+  });
+
+  if (!mealSlotRecipe || mealSlotRecipe.mealSlot.weeklyPlan.userId !== userId) {
+    throw new Error("Meal slot recipe not found");
+  }
+
+  await db
+    .update(mealSlotRecipes)
+    .set({ servings: input.servings })
+    .where(eq(mealSlotRecipes.id, input.mealSlotRecipeId));
 
   revalidatePath("/plan");
 }
@@ -200,11 +370,15 @@ export async function getShoppingListForPlan(weeklyPlanId: string) {
     with: {
       mealSlots: {
         with: {
-          recipe: {
+          mealSlotRecipes: {
             with: {
-              recipeProducts: {
+              recipe: {
                 with: {
-                  product: true,
+                  recipeProducts: {
+                    with: {
+                      product: true,
+                    },
+                  },
                 },
               },
             },
@@ -231,26 +405,28 @@ export async function getShoppingListForPlan(weeklyPlanId: string) {
   >();
 
   for (const slot of plan.mealSlots) {
-    if (!slot.recipe) continue;
+    for (const msr of slot.mealSlotRecipes) {
+      if (!msr.recipe) continue;
 
-    const recipe = slot.recipe;
-    const servingsScale = slot.servings / recipe.servings;
+      const recipe = msr.recipe;
+      const servingsScale = msr.servings / recipe.servings;
 
-    for (const rp of recipe.recipeProducts) {
-      const key = `${rp.productId}-${rp.baseUnit}`;
-      const scaledQuantity = rp.baseQuantity * servingsScale;
+      for (const rp of recipe.recipeProducts) {
+        const key = `${rp.productId}-${rp.baseUnit}`;
+        const scaledQuantity = rp.baseQuantity * servingsScale;
 
-      if (aggregated.has(key)) {
-        const existing = aggregated.get(key)!;
-        existing.totalBaseQuantity += scaledQuantity;
-      } else {
-        aggregated.set(key, {
-          productId: rp.productId,
-          productName: rp.product.name,
-          totalBaseQuantity: scaledQuantity,
-          baseUnit: rp.baseUnit,
-          displayUnit: rp.unit,
-        });
+        if (aggregated.has(key)) {
+          const existing = aggregated.get(key)!;
+          existing.totalBaseQuantity += scaledQuantity;
+        } else {
+          aggregated.set(key, {
+            productId: rp.productId,
+            productName: rp.product.name,
+            totalBaseQuantity: scaledQuantity,
+            baseUnit: rp.baseUnit,
+            displayUnit: rp.unit,
+          });
+        }
       }
     }
   }

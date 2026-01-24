@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MealSlotDialog } from "./meal-slot-dialog";
-import type { Recipe } from "@/db/schema";
+import type { Recipe, MealSlotRecipe } from "@/db/schema";
 
 const DAYS = [
   "Monday",
@@ -24,13 +24,15 @@ const MEAL_LABELS = {
 
 type MealType = (typeof MEALS)[number];
 
+interface MealSlotRecipeWithRecipe extends MealSlotRecipe {
+  recipe: Recipe;
+}
+
 interface MealSlot {
   id: string;
   dayOfWeek: number;
   mealType: MealType;
-  recipeId: string | null;
-  servings: number;
-  recipe: Recipe | null;
+  mealSlotRecipes: MealSlotRecipeWithRecipe[];
 }
 
 interface MealPlannerGridProps {
@@ -87,6 +89,7 @@ export function MealPlannerGrid({
             <div className="flex items-center font-medium">{day}</div>
             {MEALS.map((meal) => {
               const slot = getSlot(dayIndex, meal);
+              const recipeCount = slot?.mealSlotRecipes?.length || 0;
               return (
                 <Card
                   key={`${day}-${meal}`}
@@ -97,8 +100,14 @@ export function MealPlannerGrid({
                 >
                   <CardHeader className="p-3">
                     <CardTitle className="text-sm font-normal">
-                      {slot?.recipe ? (
-                        <span className="font-medium">{slot.recipe.name}</span>
+                      {recipeCount > 0 ? (
+                        <ul className="space-y-1">
+                          {slot?.mealSlotRecipes.map((msr) => (
+                            <li key={msr.id} className="font-medium">
+                              {msr.recipe.name}
+                            </li>
+                          ))}
+                        </ul>
                       ) : (
                         <span className="text-muted-foreground">
                           + Add recipe
@@ -107,13 +116,7 @@ export function MealPlannerGrid({
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-3 pt-0">
-                    {slot?.recipe ? (
-                      <p className="text-xs text-muted-foreground">
-                        {slot.servings} servings
-                      </p>
-                    ) : (
-                      <div className="h-4"></div>
-                    )}
+                    {recipeCount === 0 && <div className="h-4"></div>}
                   </CardContent>
                 </Card>
               );
