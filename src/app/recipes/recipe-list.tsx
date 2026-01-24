@@ -33,13 +33,15 @@ export function RecipeList({ recipes, products }: RecipeListProps) {
     useState<RecipeWithIngredients | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredRecipes = recipes.filter((recipe) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      recipe.name.toLowerCase().includes(query) ||
-      recipe.description?.toLowerCase().includes(query)
-    );
-  });
+  const filteredRecipes = recipes
+    .filter((recipe) => {
+      const query = searchQuery.toLowerCase();
+      return (
+        recipe.name.toLowerCase().includes(query) ||
+        recipe.description?.toLowerCase().includes(query)
+      );
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   if (recipes.length === 0) {
     return (
