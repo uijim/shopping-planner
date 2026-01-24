@@ -233,7 +233,7 @@ export function ShoppingListContent({
     <>
       <PageHeader>
         <div className="flex items-center gap-4">
-          <Link href="/plan" className="screen-only">
+          <Link href="/" className="screen-only">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -356,7 +356,7 @@ export function ShoppingListContent({
               Add meals to your weekly plan or add custom items.
             </p>
             <div className="mt-4 flex gap-2 screen-only">
-              <Link href="/plan">
+              <Link href="/">
                 <Button variant="outline">Go to Meal Planner</Button>
               </Link>
               <Button onClick={() => setDialogOpen(true)}>
