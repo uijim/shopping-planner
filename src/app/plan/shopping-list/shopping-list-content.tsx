@@ -245,31 +245,35 @@ export function ShoppingListContent({
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
+            size="sm"
             onClick={handleShare}
             disabled={totalItemCount === 0}
+            className="md:size-default"
           >
-            <Share2 className="mr-1 h-4 w-4" />
-            Share
+            <Share2 className="h-4 w-4 md:mr-1" />
+            <span className="hidden md:inline">Share</span>
           </Button>
           {customItems.length > 0 && (
             <Button
               variant="outline"
+              size="sm"
               onClick={handleClearAllCustomItems}
               disabled={isPending}
+              className="md:size-default"
             >
-              <Trash2 className="mr-1 h-4 w-4" />
-              {isPending ? "Clearing..." : "Clear custom"}
+              <Trash2 className="h-4 w-4 md:mr-1" />
+              <span className="hidden md:inline">{isPending ? "Clearing..." : "Clear custom"}</span>
             </Button>
           )}
           <AddFromSavedModal savedItems={savedItems} weeklyPlanId={weeklyPlanId} />
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-1 h-4 w-4" />
-                Add Item
+              <Button size="sm" className="md:size-default">
+                <Plus className="h-4 w-4 md:mr-1" />
+                <span className="hidden md:inline">Add Item</span>
               </Button>
             </DialogTrigger>
           <DialogContent>

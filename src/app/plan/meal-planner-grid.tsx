@@ -66,7 +66,8 @@ export function MealPlannerGrid({
 
   return (
     <>
-      <div className="grid gap-4">
+      {/* Desktop Grid Layout */}
+      <div className="hidden gap-4 md:grid">
         {/* Header row with meal types */}
         <div className="grid grid-cols-[120px_1fr_1fr_1fr] gap-4">
           <div></div>
@@ -122,6 +123,49 @@ export function MealPlannerGrid({
               );
             })}
           </div>
+        ))}
+      </div>
+
+      {/* Mobile Layout - Stacked cards by day */}
+      <div className="flex flex-col gap-4 md:hidden">
+        {DAYS.map((day, dayIndex) => (
+          <Card key={day}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">{day}</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-3 gap-2">
+              {MEALS.map((meal) => {
+                const slot = getSlot(dayIndex, meal);
+                const recipeCount = slot?.mealSlotRecipes?.length || 0;
+                return (
+                  <div
+                    key={`${day}-${meal}`}
+                    className="cursor-pointer rounded-md border p-2 transition-colors hover:bg-accent"
+                    onClick={() =>
+                      setSelectedSlot({ dayOfWeek: dayIndex, mealType: meal })
+                    }
+                  >
+                    <div className="mb-1 text-xs font-medium text-muted-foreground">
+                      {MEAL_LABELS[meal]}
+                    </div>
+                    <div className="text-sm">
+                      {recipeCount > 0 ? (
+                        <ul className="space-y-0.5">
+                          {slot?.mealSlotRecipes.map((msr) => (
+                            <li key={msr.id} className="truncate font-medium">
+                              {msr.recipe.name}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <span className="text-muted-foreground">+ Add</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
         ))}
       </div>
 

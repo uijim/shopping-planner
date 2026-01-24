@@ -84,9 +84,9 @@ export function AddFromSavedModal({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" disabled={savedItems.length === 0}>
-          <Star className="mr-1 h-4 w-4" />
-          Add from Saved
+        <Button variant="outline" size="sm" disabled={savedItems.length === 0} className="md:size-default">
+          <Star className="h-4 w-4 md:mr-1" />
+          <span className="hidden md:inline">Add from Saved</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
