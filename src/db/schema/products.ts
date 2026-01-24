@@ -1,5 +1,6 @@
-import { pgTable, text, uuid } from "drizzle-orm/pg-core";
-import { baseUnitEnum } from "./units";
+import { pgTable, text, uuid, pgEnum } from "drizzle-orm/pg-core";
+
+export const baseUnitEnum = pgEnum("base_unit", ["g", "ml", "unit"]);
 
 export const products = pgTable("products", {
   id: uuid("id").defaultRandom().primaryKey(),

@@ -3,39 +3,10 @@ config({ path: ".env.local" });
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { units } from "./schema/units";
 import { products } from "./schema/products";
 
 const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
-
-const builtInUnits = [
-  // Weight units (base: grams)
-  { name: "gram", abbreviation: "g", baseUnit: "g" as const, conversionFactor: 1 },
-  { name: "kilogram", abbreviation: "kg", baseUnit: "g" as const, conversionFactor: 1000 },
-  { name: "ounce", abbreviation: "oz", baseUnit: "g" as const, conversionFactor: 28.35 },
-  { name: "pound", abbreviation: "lb", baseUnit: "g" as const, conversionFactor: 453.59 },
-
-  // Volume units (base: milliliters)
-  { name: "milliliter", abbreviation: "ml", baseUnit: "ml" as const, conversionFactor: 1 },
-  { name: "liter", abbreviation: "l", baseUnit: "ml" as const, conversionFactor: 1000 },
-  { name: "teaspoon", abbreviation: "tsp", baseUnit: "ml" as const, conversionFactor: 4.93 },
-  { name: "tablespoon", abbreviation: "tbsp", baseUnit: "ml" as const, conversionFactor: 14.79 },
-  { name: "cup", abbreviation: "cup", baseUnit: "ml" as const, conversionFactor: 236.59 },
-  { name: "fluid ounce", abbreviation: "fl oz", baseUnit: "ml" as const, conversionFactor: 29.57 },
-
-  // Count units (base: unit)
-  { name: "unit", abbreviation: "unit", baseUnit: "unit" as const, conversionFactor: 1 },
-  { name: "piece", abbreviation: "pc", baseUnit: "unit" as const, conversionFactor: 1 },
-  { name: "whole", abbreviation: "whole", baseUnit: "unit" as const, conversionFactor: 1 },
-  { name: "clove", abbreviation: "clove", baseUnit: "unit" as const, conversionFactor: 1 },
-  { name: "bunch", abbreviation: "bunch", baseUnit: "unit" as const, conversionFactor: 1 },
-  { name: "slice", abbreviation: "slice", baseUnit: "unit" as const, conversionFactor: 1 },
-  { name: "can", abbreviation: "can", baseUnit: "unit" as const, conversionFactor: 1 },
-  { name: "bottle", abbreviation: "bottle", baseUnit: "unit" as const, conversionFactor: 1 },
-  { name: "pack", abbreviation: "pack", baseUnit: "unit" as const, conversionFactor: 1 },
-  { name: "bag", abbreviation: "bag", baseUnit: "unit" as const, conversionFactor: 1 },
-];
 
 const globalProducts = [
   // Dairy
@@ -163,12 +134,6 @@ const globalProducts = [
 
 async function seed() {
   console.log("Seeding database...");
-
-  console.log("Inserting units...");
-  await db.insert(units).values(
-    builtInUnits.map((u) => ({ ...u, userId: null }))
-  );
-  console.log(`Inserted ${builtInUnits.length} units`);
 
   console.log("Inserting products...");
   await db.insert(products).values(

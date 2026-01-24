@@ -2,15 +2,10 @@ import { relations } from "drizzle-orm";
 import { products } from "./schema/products";
 import { recipes, recipeProducts } from "./schema/recipes";
 import { weeklyPlans, mealSlots, mealSlotRecipes } from "./schema/meal-plans";
-import {
-  shoppingLists,
-  shoppingListItems,
-  customShoppingItems,
-} from "./schema/shopping-list";
+import { customShoppingItems } from "./schema/shopping-list";
 
 export const productsRelations = relations(products, ({ many }) => ({
   recipeProducts: many(recipeProducts),
-  shoppingListItems: many(shoppingListItems),
 }));
 
 export const recipesRelations = relations(recipes, ({ many }) => ({
@@ -34,7 +29,6 @@ export const recipeProductsRelations = relations(
 
 export const weeklyPlansRelations = relations(weeklyPlans, ({ many }) => ({
   mealSlots: many(mealSlots),
-  shoppingLists: many(shoppingLists),
   customShoppingItems: many(customShoppingItems),
 }));
 
@@ -56,31 +50,6 @@ export const mealSlotRecipesRelations = relations(
     recipe: one(recipes, {
       fields: [mealSlotRecipes.recipeId],
       references: [recipes.id],
-    }),
-  })
-);
-
-export const shoppingListsRelations = relations(
-  shoppingLists,
-  ({ one, many }) => ({
-    weeklyPlan: one(weeklyPlans, {
-      fields: [shoppingLists.weeklyPlanId],
-      references: [weeklyPlans.id],
-    }),
-    items: many(shoppingListItems),
-  })
-);
-
-export const shoppingListItemsRelations = relations(
-  shoppingListItems,
-  ({ one }) => ({
-    shoppingList: one(shoppingLists, {
-      fields: [shoppingListItems.shoppingListId],
-      references: [shoppingLists.id],
-    }),
-    product: one(products, {
-      fields: [shoppingListItems.productId],
-      references: [products.id],
     }),
   })
 );

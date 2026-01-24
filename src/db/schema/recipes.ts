@@ -1,6 +1,5 @@
 import { pgTable, text, uuid, integer, real } from "drizzle-orm/pg-core";
-import { products } from "./products";
-import { baseUnitEnum } from "./units";
+import { products, baseUnitEnum } from "./products";
 
 export const recipes = pgTable("recipes", {
   id: uuid("id").defaultRandom().primaryKey(),
