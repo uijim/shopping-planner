@@ -49,13 +49,13 @@ export default function RootLayout({
           >
           <header className="flex items-center justify-between p-4 print-hidden">
             <div className="flex items-center gap-2 md:gap-8">
-              <NavLinks />
               <Link href="/" className="flex items-center gap-2 text-lg font-semibold md:text-xl">
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-green-600">
                   <ShoppingCart className="h-5 w-5 text-white" />
                 </span>
                 <span className="hidden sm:inline">Shopping Planner</span>
               </Link>
+              <NavLinks />
             </div>
             <div className="flex gap-4">
               <SignedOut>

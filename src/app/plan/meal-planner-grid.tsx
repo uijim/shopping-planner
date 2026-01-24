@@ -130,10 +130,10 @@ export function MealPlannerGrid({
       <div className="flex flex-col gap-4 md:hidden">
         {DAYS.map((day, dayIndex) => (
           <Card key={day}>
-            <CardHeader className="pb-2">
+            <CardHeader className="gap-0 pb-2">
               <CardTitle className="text-base">{day}</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-3 gap-2">
+            <CardContent className="flex flex-col gap-2">
               {MEALS.map((meal) => {
                 const slot = getSlot(dayIndex, meal);
                 const recipeCount = slot?.mealSlotRecipes?.length || 0;
