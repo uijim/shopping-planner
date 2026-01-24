@@ -8,6 +8,8 @@ A Next.js application for planning shopping lists and meals.
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4
 - **UI Components**: shadcn/ui
+- **Database**: Drizzle ORM with Neon (PostgreSQL)
+- **Authentication**: Clerk
 
 ## Project Structure
 
@@ -15,6 +17,7 @@ A Next.js application for planning shopping lists and meals.
 src/
 ├── app/           # Next.js App Router pages and layouts
 ├── components/    # React components (ui/ for shadcn components)
+├── db/            # Database schema and utilities (Drizzle)
 └── lib/           # Utility functions
 ```
 
@@ -23,6 +26,10 @@ src/
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run lint` - Run ESLint
+- `npm run db:generate` - Generate Drizzle migrations
+- `npm run db:push` - Push schema changes to database
+- `npm run db:studio` - Open Drizzle Studio
+- `npm run db:seed` - Seed the database
 
 ## Adding UI Components
 
