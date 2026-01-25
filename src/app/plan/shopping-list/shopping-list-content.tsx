@@ -238,12 +238,7 @@ export function ShoppingListContent({
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <div>
-            <h1 className="text-2xl font-bold">Shopping List</h1>
-            <p className="text-muted-foreground">
-              Week of {formatDate(weekStartDate)}
-            </p>
-          </div>
+          <h1 className="text-2xl font-bold">Shopping List</h1>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
