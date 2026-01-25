@@ -55,7 +55,9 @@ export default function RootLayout({
                 </span>
                 <span className="hidden sm:inline">Shopping Planner</span>
               </Link>
-              <NavLinks />
+              <SignedIn>
+                <NavLinks />
+              </SignedIn>
             </div>
             <div className="flex gap-4">
               <SignedOut>

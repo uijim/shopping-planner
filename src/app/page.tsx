@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
+import { auth } from "@clerk/nextjs/server";
+import { SignInButton } from "@clerk/nextjs";
 import { getOrCreateWeeklyPlan, getRecipesForSelection } from "./plan/actions";
 import { MealPlannerGrid } from "./plan/meal-planner-grid";
 import { ClearAllButton } from "./plan/clear-all-button";
@@ -8,6 +10,25 @@ import { PageWrapper } from "@/components/page-wrapper";
 import { PageHeader } from "@/components/page-header";
 
 export default async function Home() {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return (
+      <PageWrapper>
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <h1 className="text-3xl font-bold mb-4">Welcome to Shopping Planner</h1>
+          <p className="text-muted-foreground mb-8 max-w-md">
+            Plan your weekly meals and automatically generate shopping lists.
+            Sign in to get started.
+          </p>
+          <SignInButton mode="modal">
+            <Button size="lg">Sign In to Get Started</Button>
+          </SignInButton>
+        </div>
+      </PageWrapper>
+    );
+  }
+
   const [weeklyPlan, recipes] = await Promise.all([
     getOrCreateWeeklyPlan(),
     getRecipesForSelection(),
