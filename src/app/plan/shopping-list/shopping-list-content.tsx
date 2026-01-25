@@ -77,26 +77,16 @@ export function ShoppingListContent({
     customItems.filter((item) => item.isChecked).map((item) => `custom-${item.id}`)
   );
 
-  // Combine recipe items with custom items
-  type CombinedItem =
-    | { type: "recipe"; item: ShoppingListItem; sortName: string }
-    | { type: "custom"; item: CustomShoppingItemData; sortName: string };
+  // Sort recipe items alphabetically
+  const sortedRecipeItems = [...items].sort((a, b) =>
+    a.productName.toLowerCase().localeCompare(b.productName.toLowerCase())
+  );
 
-  const allItems: CombinedItem[] = [
-    ...items.map((item) => ({
-      type: "recipe" as const,
-      item,
-      sortName: item.productName.toLowerCase(),
-    })),
-    ...customItems.map((item) => ({
-      type: "custom" as const,
-      item,
-      sortName: item.name.toLowerCase(),
-    })),
-  ];
+  // Sort custom items alphabetically
+  const sortedCustomItems = [...customItems].sort((a, b) =>
+    a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+  );
 
-  // Sort alphabetically by name
-  const sortedItems = allItems.sort((a, b) => a.sortName.localeCompare(b.sortName));
   const totalItemCount = items.length + customItems.length;
 
   const formatDate = (dateString: string) => {
@@ -170,13 +160,18 @@ export function ShoppingListContent({
   const formatListForSharing = () => {
     const lines: string[] = [];
 
-    for (const combinedItem of sortedItems) {
-      if (combinedItem.type === "recipe") {
-        const item = combinedItem.item;
+    if (sortedRecipeItems.length > 0) {
+      lines.push("Recipe Items:");
+      for (const item of sortedRecipeItems) {
         const qty = formatQuantity(item);
         lines.push(`• ${item.productName} (${qty})`);
-      } else {
-        const item = combinedItem.item;
+      }
+    }
+
+    if (sortedCustomItems.length > 0) {
+      if (lines.length > 0) lines.push("");
+      lines.push("Other Items:");
+      for (const item of sortedCustomItems) {
         const qty = formatCustomQuantity(item);
         if (qty) {
           lines.push(`• ${item.name} (${qty})`);
@@ -367,12 +362,14 @@ export function ShoppingListContent({
             {totalItemCount} item{totalItemCount !== 1 ? "s" : ""}
           </p>
 
-          <Card className="print-no-chrome">
-            <CardContent className="pt-6">
-              <ul className="space-y-3">
-                {sortedItems.map((combinedItem) => {
-                  if (combinedItem.type === "recipe") {
-                    const item = combinedItem.item;
+          {sortedRecipeItems.length > 0 && (
+            <Card className="print-no-chrome">
+              <CardContent className="pt-6">
+                <h2 className="mb-4 text-sm font-semibold text-muted-foreground">
+                  Recipe Items ({sortedRecipeItems.length})
+                </h2>
+                <ul className="space-y-3">
+                  {sortedRecipeItems.map((item) => {
                     const itemKey = `${item.productId}-${item.baseUnit}`;
                     const isChecked = checkedItems.has(itemKey);
 
@@ -398,8 +395,20 @@ export function ShoppingListContent({
                         </label>
                       </li>
                     );
-                  } else {
-                    const item = combinedItem.item;
+                  })}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {sortedCustomItems.length > 0 && (
+            <Card className="print-no-chrome">
+              <CardContent className="pt-6">
+                <h2 className="mb-4 text-sm font-semibold text-muted-foreground">
+                  Other Items ({sortedCustomItems.length})
+                </h2>
+                <ul className="space-y-3">
+                  {sortedCustomItems.map((item) => {
                     const itemKey = `custom-${item.id}`;
                     const isChecked =
                       item.isChecked || customCheckedState.has(itemKey);
@@ -440,11 +449,11 @@ export function ShoppingListContent({
                         </Button>
                       </li>
                     );
-                  }
-                })}
-              </ul>
-            </CardContent>
-          </Card>
+                  })}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
     </>
