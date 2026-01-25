@@ -345,8 +345,12 @@ export async function clearAllMeals(weeklyPlanId: string) {
   }
 
   await db.delete(mealSlots).where(eq(mealSlots.weeklyPlanId, weeklyPlanId));
+  await db
+    .delete(customShoppingItems)
+    .where(eq(customShoppingItems.weeklyPlanId, weeklyPlanId));
 
   revalidatePath("/plan");
+  revalidatePath("/plan/shopping-list");
 }
 
 export interface ShoppingListItem {
