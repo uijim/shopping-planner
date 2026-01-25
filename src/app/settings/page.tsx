@@ -1,6 +1,8 @@
 "use client";
 
 import { useTheme } from "next-themes";
+import { PageWrapper } from "@/components/page-wrapper";
+import { PageHeader } from "@/components/page-header";
 import {
   Card,
   CardContent,
@@ -21,8 +23,15 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <main className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Settings</h1>
+    <PageWrapper>
+      <PageHeader>
+        <div>
+          <h1 className="text-2xl font-bold">Settings</h1>
+          <p className="text-muted-foreground">
+            Manage your application preferences
+          </p>
+        </div>
+      </PageHeader>
 
       <Card className="max-w-md">
         <CardHeader>
@@ -47,6 +56,6 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
-    </main>
+    </PageWrapper>
   );
 }
