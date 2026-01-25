@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { auth } from "@clerk/nextjs/server";
-import { SignInButton } from "@clerk/nextjs";
+import { SignedOut, SignInButton } from "@clerk/nextjs";
 import { getOrCreateWeeklyPlan, getRecipesForSelection } from "./plan/actions";
 import { MealPlannerGrid } from "./plan/meal-planner-grid";
 import { ClearAllButton } from "./plan/clear-all-button";
@@ -21,9 +21,11 @@ export default async function Home() {
             Plan your weekly meals and automatically generate shopping lists.
             Sign in to get started.
           </p>
-          <SignInButton mode="modal">
-            <Button size="lg">Sign In to Get Started</Button>
-          </SignInButton>
+          <SignedOut>
+            <SignInButton mode="modal">
+              <Button size="lg">Sign In to Get Started</Button>
+            </SignInButton>
+          </SignedOut>
         </div>
       </PageWrapper>
     );
