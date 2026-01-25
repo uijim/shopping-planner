@@ -48,12 +48,7 @@ export function SavedItemsList({ items }: SavedItemsListProps) {
   return (
     <>
       <PageHeader>
-        <div>
-          <h1 className="text-2xl font-bold">Saved Items</h1>
-          <p className="text-muted-foreground">
-            Items you frequently add to your shopping list
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold">Saved Items</h1>
         <AddSavedItemDialog />
       </PageHeader>
 
