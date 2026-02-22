@@ -52,6 +52,7 @@ interface RecipeIngredient {
 interface CreateRecipeInput {
   name: string;
   description?: string;
+  instructions?: string;
   servings: number;
   ingredients: RecipeIngredient[];
 }
@@ -68,6 +69,7 @@ export async function createRecipe(input: CreateRecipeInput) {
       userId,
       name: input.name,
       description: input.description || null,
+      instructions: input.instructions || null,
       servings: input.servings,
     })
     .returning();
@@ -94,6 +96,7 @@ interface UpdateRecipeInput {
   id: string;
   name: string;
   description?: string;
+  instructions?: string;
   servings: number;
   ingredients: RecipeIngredient[];
 }
@@ -119,6 +122,7 @@ export async function updateRecipe(input: UpdateRecipeInput) {
     .set({
       name: input.name,
       description: input.description || null,
+      instructions: input.instructions || null,
       servings: input.servings,
     })
     .where(eq(recipes.id, input.id))

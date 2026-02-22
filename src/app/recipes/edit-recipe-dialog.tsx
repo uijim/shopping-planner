@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -41,6 +42,7 @@ const ingredientSchema = z.object({
 const recipeSchema = z.object({
   name: z.string().min(1, "Recipe name is required"),
   description: z.string().optional(),
+  instructions: z.string().optional(),
   servings: z.number().int().positive(),
   ingredients: z
     .array(ingredientSchema)
@@ -66,6 +68,7 @@ interface RecipeWithIngredients {
   id: string;
   name: string;
   description: string | null;
+  instructions: string | null;
   servings: number;
   recipeProducts: {
     productId: string;
@@ -95,6 +98,7 @@ export function EditRecipeDialog({
     defaultValues: {
       name: recipe.name,
       description: recipe.description || "",
+      instructions: recipe.instructions || "",
       servings: recipe.servings,
       ingredients: recipe.recipeProducts.map((rp) => ({
         productId: rp.productId,
@@ -114,6 +118,7 @@ export function EditRecipeDialog({
     form.reset({
       name: recipe.name,
       description: recipe.description || "",
+      instructions: recipe.instructions || "",
       servings: recipe.servings,
       ingredients: recipe.recipeProducts.map((rp) => ({
         productId: rp.productId,
@@ -141,6 +146,7 @@ export function EditRecipeDialog({
         id: recipe.id,
         name: data.name,
         description: data.description,
+        instructions: data.instructions,
         servings: data.servings,
         ingredients: ingredientsWithBase,
       });
@@ -200,6 +206,24 @@ export function EditRecipeDialog({
                   <FormControl>
                     <Input
                       placeholder="A brief description of the recipe"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="instructions"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Instructions (optional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Add cooking instructions..."
+                      className="min-h-[100px]"
                       {...field}
                     />
                   </FormControl>

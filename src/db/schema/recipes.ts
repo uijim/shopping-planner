@@ -6,6 +6,7 @@ export const recipes = pgTable("recipes", {
   userId: text("user_id").notNull(),
   name: text("name").notNull(),
   description: text("description"),
+  instructions: text("instructions"),
   servings: integer("servings").notNull().default(4),
 });
 

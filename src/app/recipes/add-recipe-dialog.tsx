@@ -21,6 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -42,6 +43,7 @@ const ingredientSchema = z.object({
 const recipeSchema = z.object({
   name: z.string().min(1, "Recipe name is required"),
   description: z.string().optional(),
+  instructions: z.string().optional(),
   servings: z.number().int().positive(),
   ingredients: z
     .array(ingredientSchema)
@@ -76,6 +78,7 @@ export function AddRecipeDialog({ products }: AddRecipeDialogProps) {
     defaultValues: {
       name: "",
       description: "",
+      instructions: "",
       servings: 4,
       ingredients: [{ productId: "", quantity: 1, unit: "unit" }],
     },
@@ -103,6 +106,7 @@ export function AddRecipeDialog({ products }: AddRecipeDialogProps) {
       await createRecipe({
         name: data.name,
         description: data.description,
+        instructions: data.instructions,
         servings: data.servings,
         ingredients: ingredientsWithBase,
       });
@@ -156,6 +160,24 @@ export function AddRecipeDialog({ products }: AddRecipeDialogProps) {
                   <FormControl>
                     <Input
                       placeholder="A brief description of the recipe"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="instructions"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Instructions (optional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Add cooking instructions..."
+                      className="min-h-[100px]"
                       {...field}
                     />
                   </FormControl>
