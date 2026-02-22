@@ -11,6 +11,7 @@ interface RecipeWithIngredients {
   id: string;
   name: string;
   description: string | null;
+  instructions: string | null;
   servings: number;
   recipeProducts: {
     productId: string;
@@ -36,10 +37,7 @@ export function RecipeList({ recipes, products }: RecipeListProps) {
   const filteredRecipes = recipes
     .filter((recipe) => {
       const query = searchQuery.toLowerCase();
-      return (
-        recipe.name.toLowerCase().includes(query) ||
-        recipe.description?.toLowerCase().includes(query)
-      );
+      return recipe.name.toLowerCase().includes(query);
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -87,11 +85,6 @@ export function RecipeList({ recipes, products }: RecipeListProps) {
               <CardTitle>{recipe.name}</CardTitle>
             </CardHeader>
             <CardContent>
-              {recipe.description && (
-                <p className="mb-2 text-sm text-muted-foreground">
-                  {recipe.description}
-                </p>
-              )}
               <p className="text-sm">
                 <span className="font-medium">{recipe.servings}</span> servings
               </p>

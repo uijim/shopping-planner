@@ -159,41 +159,6 @@ export function AddRecipeDialog({ products: initialProducts }: AddRecipeDialogPr
 
             <FormField
               control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description (optional)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="A brief description of the recipe"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="instructions"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Instructions (optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Add cooking instructions..."
-                      className="min-h-[100px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="servings"
               render={({ field }) => (
                 <FormItem>
@@ -312,6 +277,24 @@ export function AddRecipeDialog({ products: initialProducts }: AddRecipeDialogPr
                 </div>
               ))}
             </div>
+
+            <FormField
+              control={form.control}
+              name="instructions"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Instructions (optional)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Add cooking instructions..."
+                      className="min-h-[100px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button
