@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Plus, Share2, ShoppingCart, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -243,8 +243,8 @@ export function ShoppingListContent({
             disabled={totalItemCount === 0}
             className="md:size-default"
           >
-            <Share2 className="h-4 w-4 md:mr-1" />
-            <span className="hidden md:inline">Share</span>
+            <Download className="h-4 w-4 md:mr-1" />
+            <span className="hidden md:inline">Export</span>
           </Button>
           {customItems.length > 0 && (
             <Button
