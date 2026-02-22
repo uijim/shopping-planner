@@ -2,9 +2,34 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { recipes, recipeProducts } from "@/db/schema";
+import { recipes, recipeProducts, products } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+
+interface CreateProductInput {
+  name: string;
+  defaultUnit: "g" | "ml" | "unit";
+}
+
+export async function createProduct(input: CreateProductInput) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  const [product] = await db
+    .insert(products)
+    .values({
+      userId,
+      name: input.name,
+      defaultUnit: input.defaultUnit,
+    })
+    .returning();
+
+  // Don't revalidate here - let the recipe save handle it
+  // This prevents the dialog from closing when creating a product inline
+  return product;
+}
 
 export async function getRecipes() {
   const { userId } = await auth();

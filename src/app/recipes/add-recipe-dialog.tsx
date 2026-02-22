@@ -33,6 +33,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { createRecipe } from "./actions";
 import { toBaseUnit } from "@/lib/units";
 import type { Product } from "@/db/schema";
+import { ProductCombobox } from "@/components/product-combobox";
 
 const ingredientSchema = z.object({
   productId: z.string().min(1, "Select a product"),
@@ -69,9 +70,14 @@ interface AddRecipeDialogProps {
   products: Product[];
 }
 
-export function AddRecipeDialog({ products }: AddRecipeDialogProps) {
+export function AddRecipeDialog({ products: initialProducts }: AddRecipeDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [localProducts, setLocalProducts] = useState<Product[]>(initialProducts);
+
+  const handleProductCreated = (newProduct: Product) => {
+    setLocalProducts((prev) => [...prev, newProduct].sort((a, b) => a.name.localeCompare(b.name)));
+  };
 
   const form = useForm<RecipeFormValues>({
     resolver: zodResolver(recipeSchema),
@@ -234,23 +240,14 @@ export function AddRecipeDialog({ products }: AddRecipeDialogProps) {
                     name={`ingredients.${index}.productId`}
                     render={({ field }) => (
                       <FormItem className="flex-1">
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select product" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {products.map((product) => (
-                              <SelectItem key={product.id} value={product.id}>
-                                {product.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <ProductCombobox
+                            products={localProducts}
+                            value={field.value}
+                            onChange={field.onChange}
+                            onProductCreated={handleProductCreated}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
